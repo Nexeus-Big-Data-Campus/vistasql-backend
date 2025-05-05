@@ -28,4 +28,4 @@ VistaSQL backend project
 1. Activate the virtual environment
 2. Start the server
 
-    `fastap dev main.py`
+    `fastapi dev main.py`
