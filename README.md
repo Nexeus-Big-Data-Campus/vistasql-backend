@@ -1,6 +1,10 @@
 # vistasql-backend
 VistaSQL backend project
 
+### Technologies used
+
+- [FastAPI](https://fastapi.tiangolo.com/)
+
 
 ### Requirements
 - [Docker Compose](https://docs.docker.com/compose/install/) 
