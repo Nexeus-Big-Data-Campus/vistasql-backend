@@ -3,29 +3,14 @@ VistaSQL backend project
 
 
 ### Requirements
-- [Python](https://www.geeksforgeeks.org/how-to-install-python-on-linux/) 
+- [Docker Compose](https://docs.docker.com/compose/install/) 
 
 ## Setting up the project
 
-1. Create the virtual environment
-
-    `python -m venv .venv`
-
-2. Activate the virtual environment
-
-    `source .venv/bin/activate`
-
-3. Install pip
-
-    `python -m pip install --upgrade pip`
-
-4. Install the project's requirements
-
-    `pip install -r requirements.txt`
+1. Copy the `.env.dist` to a new file called `.env`
 
 ## Running the project locally
 
-1. Activate the virtual environment
-2. Start the server
+1. Run the containers
 
-    `fastap dev main.py`
+    `docker compose up --build`
