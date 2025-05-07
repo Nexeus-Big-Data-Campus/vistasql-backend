@@ -16,10 +16,13 @@ def add_user(name: str, email: str, password: str):
 
     with Session(engine) as session:
             # Verificar si el email ya existe
-            statement = select(User).where(User.email == email)
-            existing_user = session.exec(statement).first()
-            if existing_user:
-                raise HTTPException(status_code=400, detail="El email ya está registrado")
+            try:
+                existing_user = get_user_by_email(email)
+                if existing_user:
+                    raise HTTPException(status_code=400, detail="El email ya está registrado")
+            except HTTPException:
+            # Si no se encuentra el usuario, continúa con el registro
+                pass
 
             # Encriptar la contraseña
             hashed_password = pwd_context.hash(password)
@@ -44,3 +47,45 @@ def get_user_by_email(email: str):
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
         return user
     
+def delete_user(email: str):
+    '''
+    Elimina un usuario de la base de datos dado su email.
+    email: Correo electrónico del usuario
+    '''
+    with Session(engine) as session:
+        # Buscar el usuario por email
+        statement = select(User).where(User.email == email)
+        user = session.exec(statement).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Eliminar el usuario
+        session.delete(user)
+        session.commit()
+        return {"detail": "Usuario eliminado"}
+
+def update_user(email: str, name: str = None, password: str = None):
+    '''
+    Actualiza un usuario en la base de datos dado su email.
+    email: Correo electrónico del usuario
+    name: Nuevo nombre del usuario (opcional)
+    password: Nueva contraseña del usuario (opcional)
+    '''
+    with Session(engine) as session:
+        # Buscar el usuario por email
+        statement = select(User).where(User.email == email)
+        user = session.exec(statement).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        # Actualizar el nombre y/o la contraseña
+        if name:
+            user.name = name
+        if password:
+            pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+            user.password = pwd_context.hash(password)
+        
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        return user
