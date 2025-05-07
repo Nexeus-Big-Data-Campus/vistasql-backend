@@ -16,13 +16,10 @@ def add_user(name: str, email: str, password: str):
 
     with Session(engine) as session:
             # Verificar si el email ya existe
-            try:
-                existing_user = get_user_by_email(email)
-                if existing_user:
-                    raise HTTPException(status_code=400, detail="El email ya está registrado")
-            except HTTPException:
-            # Si no se encuentra el usuario, continúa con el registro
-                pass
+            existing_user = get_user_by_email(email)
+            if existing_user:
+                raise HTTPException(status_code=400, detail="El email ya está registrado")
+        
 
             # Encriptar la contraseña
             hashed_password = pwd_context.hash(password)
@@ -54,10 +51,7 @@ def delete_user(email: str):
     '''
     with Session(engine) as session:
         # Buscar el usuario por email
-        statement = select(User).where(User.email == email)
-        user = session.exec(statement).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        user = get_user_by_email(email)
         
         # Eliminar el usuario
         session.delete(user)
@@ -73,10 +67,7 @@ def update_user(email: str, name: str = None, password: str = None):
     '''
     with Session(engine) as session:
         # Buscar el usuario por email
-        statement = select(User).where(User.email == email)
-        user = session.exec(statement).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        user = get_user_by_email(email)
         
         # Actualizar el nombre y/o la contraseña
         if name:
