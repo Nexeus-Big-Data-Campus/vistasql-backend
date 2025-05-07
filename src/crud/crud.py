@@ -12,7 +12,14 @@ def get_user_by_email(session: Session, email: str) -> Optional[User]:
 def create_user(session: Session, user_in: UserCreate) -> User:
     """Crea un nuevo usuario en la bnase de datos."""
     hashed_password = get_password_hash(user_in.password)
-    db_user = User(email=user_in.email, hashed_password=hashed_password, name=user_in.name ) # se crea la instancia del modelo user con la contraseña hasheada
+    
+    print(f"Valor de hashed_password despues de hashing: {hashed_password}")
+    
+    db_user = User(
+        email=user_in.email, 
+        hashed_password=hashed_password, 
+        name=user_in.name ) # se crea la instancia del modelo user con la contraseña hasheada
+    
     session.add(db_user)
     session.commit()
     session.refresh(db_user)

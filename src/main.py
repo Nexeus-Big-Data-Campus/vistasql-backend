@@ -5,7 +5,7 @@ from typing import Annotated
 from src.db import engine # Importamos el motor de la base de datos
 from src.models.user import User, UserCreate, Token # Importamos los modelos necesarios
 from src.crud import get_user_by_email, create_user # Importamos las funciones CRUB
-from src.security import create_access_token # Importamos la funcion crear token JWT
+from src.security import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES # Importamos la funcion crear token JWT
 from datetime import timedelta # Neceario para la expiracion del token
 
 app = FastAPI()
