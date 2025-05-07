@@ -6,3 +6,4 @@ class User(SQLModel, table=True):
     name: str
     email: str
     password: str
+    
