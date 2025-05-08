@@ -1,19 +1,14 @@
 from fastapi import FastAPI, HTTPException, Depends
 from sqlmodel import SQLModel, Session, select
 from src.db import engine
-from src.models import User, create_token
+from src.models.user import User, create_token
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 import os
-from dotenv import load_dotenv
 from src.crud.user_crud import add_user
 
 app = FastAPI()
 
-load_dotenv()
-
-# recuperamos la clave secreta del entorno
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
 @app.on_event("startup")
 def on_startup():

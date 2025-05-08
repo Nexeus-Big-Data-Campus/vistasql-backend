@@ -1,6 +1,6 @@
 from src.models import User
 from sqlmodel import SQLModel, Session, select
-from src.db import engine, pwd_context
+from src.db.db import engine, pwd_context
 from passlib.context import CryptContext
 from fastapi import FastAPI, HTTPException
 

@@ -1,8 +1,12 @@
 from sqlmodel import SQLModel, Field
 from typing import Optional
 import jwt
-from src.main import JWT_SECRET_KEY
+import os
+from dotenv import load_dotenv
 from datetime import datetime, timedelta
+
+# recuperamos la clave secreta del entorno
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
