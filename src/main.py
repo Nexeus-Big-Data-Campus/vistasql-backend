@@ -1,3 +1,4 @@
+import os #se añade esta importacion
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlmodel import SQLModel, Session
 from typing import Annotated
@@ -8,7 +9,14 @@ from src.crud import get_user_by_email, create_user # Importamos las funciones C
 from src.security import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES # Importamos la funcion crear token JWT
 from datetime import timedelta # Neceario para la expiracion del token
 
-app = FastAPI()
+# Se obtiene el entorno, por defecto es "dev" si no esta configurado
+ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
+
+# Configura condicionalmente docs_url y redoc_url
+dosc_url = "/docs" if ENVIRONMENT != "prod" else None
+redoc_url = "/redoc" if ENVIRONMENT != "prod" else None
+
+app = FastAPI(docs_url=dosc_url, redoc_url=redoc_url) # Pasa las urls condificonales
 
 @app.on_event("startup")
 def on_startup():
