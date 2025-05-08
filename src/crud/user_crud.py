@@ -1,6 +1,6 @@
 from src.models import User
 from sqlmodel import SQLModel, Session, select
-from src.db import engine
+from src.db import engine, pwd_context
 from passlib.context import CryptContext
 from fastapi import FastAPI, HTTPException
 
@@ -18,9 +18,8 @@ def add_user(name: str, email: str, password: str):
             # Verificar si el email ya existe
             existing_user = get_user_by_email(email)
             if existing_user:
-                raise HTTPException(status_code=400, detail="El email ya está registrado")
+                return None
         
-
             # Encriptar la contraseña
             hashed_password = pwd_context.hash(password)
 
@@ -41,7 +40,7 @@ def get_user_by_email(email: str):
         statement = select(User).where(User.email == email)
         user = session.exec(statement).first()
         if not user:
-            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+            return None
         return user
     
 def delete_user(email: str):
@@ -73,7 +72,6 @@ def update_user(email: str, name: str = None, password: str = None):
         if name:
             user.name = name
         if password:
-            pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
             user.password = pwd_context.hash(password)
         
         session.add(user)
