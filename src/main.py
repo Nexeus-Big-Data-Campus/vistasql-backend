@@ -1,18 +1,15 @@
-from fastapi import APIRouter, Depends
+from fastapi import FastAPI
 from src.db import engine
-from sqlmodel import Session
-from src.models.feedback import Feedback
-from src.schemas.feedback import FeedbackCreate
+from sqlmodel import SQLModel
+from src.crud import feedback_crud
 
-router = APIRouter
+app = FastAPI()
+app.include_router(feedback_crud.router)
 
-@router.post("/feedback")
-def create_feedback (feedback: FeedbackCreate, session: Session = Depends(engine)):
-    db_feedback = Feedback(**feedback.model_dump())
-    session.add(db_feedback)
-    session.commit()
-    session.refresh(db_feedback)
-    return db_feedback
+@app.on_event("startup")
+def on_startup():
+    SQLModel.metadata.create_all(engine)
+
 
 @app.get("/")
 def read_root():
