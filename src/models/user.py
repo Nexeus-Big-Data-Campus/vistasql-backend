@@ -8,4 +8,4 @@ class User(SQLModel, table=True):
     email: str
     password: str
     
-    feedbacks: List["Feedback"] = Relationship(back_populates=" user")
+    feedbacks: List["Feedback"] = Relationship(back_populates="user")
