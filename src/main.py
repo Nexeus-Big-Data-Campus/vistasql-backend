@@ -7,8 +7,8 @@ from src.db import engine
 from src.crud import get_user_by_email, create_user
 from src.security import create_jwt_token
 from src.dto import UserCreate
-from datetime import timedeltaç
-import user
+from datetime import datetime
+from user import User, UserAction, UserSession
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
 dosc_url = "/docs" if ENVIRONMENT != "prod" else None
@@ -27,9 +27,51 @@ def get_session():
 
 @app.post("/sign-in")
 def register_user(user: UserCreate, session: Annotated[Session, Depends(get_session)]):
+    # Ingresar un nuevo usuario
     new_user = create_user(session, user)
     if new_user is None:
         raise HTTPException(status_code=400, detail="Email already exsists")
+    
+    # Crear un registro de sesión
+    user_session = UserSession(user_id=new_user.id)
+    session.add(user_session)
+    session.commit()
 
     token = new_user.get_jtw_token()
     return {"access_token": token, "token_type": "bearer"}
+
+@app.post("/sign-out")
+def logout_user(user_id: int, session: Annotated[Session, Depends(get_session)]):
+    # Finalizar la sesión del usuario
+    user_session = session.query(UserSession).filter(
+        UserSession.user_id == user_id, UserSession.end_time == None
+    ).first()
+
+    if user_session:
+        user_session.end_time = datetime.now(datetime.timezone.utc)
+        user_session.duration = int((user_session.end_time - user_session.start_time).total_seconds())
+        session.commit()
+
+    return {"message": "User logged out successfully"}
+
+@app.post("/some-action")
+def some_action(user_id: int, session: Annotated[Session, Depends(get_session)]):
+    # Registrar la acción del usuario
+    user_action = UserAction(user_id=user_id, action="Performed some action")
+    session.add(user_action)
+    session.commit()
+
+    return {"message": "Action performed successfully"}
+
+
+@app.get("/user-sessions/{user_id}")
+def get_user_sessions(user_id: int, session: Annotated[Session, Depends(get_session)]):
+    #Obtener las sesiones del usuario
+    sessions = session.query(UserSession).filter(UserSession.user_id == user_id).all()
+    return sessions
+
+@app.get("/user-actions/{user_id}")
+def get_user_actions(user_id: int, session: Annotated[Session, Depends(get_session)]):
+    # Obtener las acciones del usuario
+    actions = session.query(UserAction).filter(UserAction.user_id == user_id).all()
+    return actions
