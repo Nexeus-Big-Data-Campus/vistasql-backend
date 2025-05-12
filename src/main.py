@@ -32,11 +32,6 @@ def register_user(user: UserCreate, session: Annotated[Session, Depends(get_sess
     if new_user is None:
         raise HTTPException(status_code=400, detail="Email already exsists")
     
-    # Crear un registro de sesión
-    user_session = UserSession(user_id=new_user.id)
-    session.add(user_session)
-    session.commit()
-
     token = new_user.get_jtw_token()
     return {"access_token": token, "token_type": "bearer"}
 
@@ -54,14 +49,6 @@ def logout_user(user_id: int, session: Annotated[Session, Depends(get_session)])
 
     return {"message": "User logged out successfully"}
 
-@app.post("/some-action")
-def some_action(user_id: int, session: Annotated[Session, Depends(get_session)]):
-    # Registrar la acción del usuario
-    user_action = UserAction(user_id=user_id, action="Performed some action")
-    session.add(user_action)
-    session.commit()
-
-    return {"message": "Action performed successfully"}
 
 
 @app.get("/user-sessions/{user_id}")
