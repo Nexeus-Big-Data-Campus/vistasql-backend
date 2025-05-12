@@ -6,7 +6,6 @@ from starlette.responses import JSONResponse
 OPEN_URLS = ["/signin", "/login", "/docs", "/openapi.json"]
 
 async def auth_middleware(request: Request, call_next):
-    # Excluimos sign-in
     if request.url.path in OPEN_URLS:
         return await call_next(request)
 
