@@ -17,5 +17,4 @@ VistaSQL backend project
 
 1. Run the containers
 
-  `docker compose up --build`
-zz
+2. Visit `http://localhost:8000`
