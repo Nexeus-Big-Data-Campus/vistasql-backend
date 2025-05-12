@@ -14,6 +14,8 @@ dosc_url = "/docs" if ENVIRONMENT != "prod" else None
 app = FastAPI(docs_url=dosc_url, redoc_url=None)
 security = HTTPBearer()
 
+app.middleware("http")(auth_middleware)
+
 @app.on_event("startup")
 def on_startup():
     

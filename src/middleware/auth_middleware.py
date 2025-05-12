@@ -2,12 +2,11 @@ from fastapi import FastAPI, Request, HTTPException
 from jwt import decode, exceptions
 from src.security.security import JWT_SECRET_KEY, decode_jwt_token
 
-app = FastAPI()
 
-@app.middleware("http")
+
 async def auth_middleware(request: Request, call_next):
     # Excluimos sign-in
-    if request.url.path in ["/sign-in"]:
+    if request.url.path in ["/sign-in", "/docs", "/openapi.json"]:
         return await call_next(request)
 
     # Obtener el token del encabezado Authorization
