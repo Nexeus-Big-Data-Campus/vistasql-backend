@@ -1,10 +1,7 @@
 import uuid
-from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional, List, TYPE_CHECKING
+from sqlmodel import SQLModel, Field
+from typing import Optional
 from src.security import create_jwt_token
-
-if TYPE_CHECKING:
-    from .feedback import Feedback
 
 class User(SQLModel, table=True):
     id: Optional[str] = Field(
@@ -17,7 +14,6 @@ class User(SQLModel, table=True):
     email: str = Field(index=True, unique=True)
     password: str
     
-    feedbacks: List["Feedback"] = Relationship(back_populates="user")
 
     def get_jwt_token(self):
         return create_jwt_token({

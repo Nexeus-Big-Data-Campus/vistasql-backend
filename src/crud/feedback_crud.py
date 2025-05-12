@@ -6,7 +6,7 @@ from src.dto.feedback import FeedbackCreate
 
 router = APIRouter()
 
-@router.post("/feedbacks")
+@router.post("/feedback")
 def create_feedback(
     feedback: FeedbackCreate,
     session: Session = Depends(get_session)
