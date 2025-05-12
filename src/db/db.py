@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, create_engine
+from sqlmodel import create_engine
 import os
 
 DATABASE_URL = os.getenv("DATABASE_URL")

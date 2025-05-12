@@ -12,10 +12,13 @@ class User(SQLModel, table=True):
     name: str
     email: str = Field(index=True, unique=True)
     password: str
+    
 
-    def get_jtw_token(self):
+    def get_jwt_token(self):
         return create_jwt_token({
             'id': self.id,
             'name': self.name,
             'email': self.email,
         })
+        
+    
