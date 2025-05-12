@@ -4,11 +4,12 @@ from src.models import User
 from src.dto import UserCreate
 from src.security import get_password_hash
 
+
 def get_user_by_email(session: Session, email: str) -> Optional[User]:
     statement = select(User).where(User.email == email)
     return session.exec(statement).first()
 
-def create_user(session: Session, user_in: UserCreate) -> User:
+def create_user(session: Session, user_in: UserCreate) -> Optional[User]:
     existing_user = get_user_by_email(session, user_in.email)
     if existing_user:
         return None

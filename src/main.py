@@ -26,5 +26,5 @@ def register_user(user: UserCreate, session: Annotated[Session, Depends(get_sess
     if new_user is None:
         raise HTTPException(status_code=400, detail="Email already exsists")
 
-    token = new_user.get_jtw_token()
+    token = new_user.get_jwt_token()
     return {"access_token": token, "token_type": "bearer"}
