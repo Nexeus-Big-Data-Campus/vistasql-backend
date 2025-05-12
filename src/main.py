@@ -4,11 +4,16 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import SQLModel, Session
 from typing import Annotated
 from src.db import engine
+<<<<<<< HEAD
 from src.crud import get_user_by_email, create_user
 from src.security import create_jwt_token
 from src.dto import UserCreate
 from datetime import datetime
 from user import User, UserAction, UserSession
+=======
+from src.crud import create_user, create_feedback
+from src.dto import UserCreate, FeedbackCreate
+>>>>>>> develop
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
 dosc_url = "/docs" if ENVIRONMENT != "prod" else None
@@ -31,6 +36,7 @@ def register_user(user: UserCreate, session: Annotated[Session, Depends(get_sess
     new_user = create_user(session, user)
     if new_user is None:
         raise HTTPException(status_code=400, detail="Email already exsists")
+<<<<<<< HEAD
     
     token = new_user.get_jtw_token()
     return {"access_token": token, "token_type": "bearer"}
@@ -62,3 +68,15 @@ def get_user_actions(user_id: int, session: Annotated[Session, Depends(get_sessi
     # Obtener las acciones del usuario
     actions = session.query(UserAction).filter(UserAction.user_id == user_id).all()
     return actions
+=======
+
+    token = new_user.get_jwt_token()
+    return {"access_token": token, "token_type": "bearer"}
+
+@app.post("/feedback")
+def add_feedback(
+    feedback: FeedbackCreate,
+    session: Annotated[Session, Depends(get_session)],
+):
+    return create_feedback(session, feedback)
+>>>>>>> develop
