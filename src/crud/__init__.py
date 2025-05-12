@@ -1,1 +1,1 @@
-from .crud import get_user_by_email, create_user
+from .crud import get_user_by_email, create_user, get_user_by_id #se añade get_user_by_id
