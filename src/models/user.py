@@ -9,7 +9,6 @@ class User(SQLModel, table=True):
         primary_key=True,
         index=True,
     )
-    
     name: str
     email: str = Field(index=True, unique=True)
     password: str

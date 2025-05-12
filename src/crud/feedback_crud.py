@@ -1,17 +1,19 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from sqlmodel import Session
-from src.db.db import get_session
 from ..models.feedback import Feedback
 from src.dto.feedback import FeedbackCreate
 
 router = APIRouter()
 
-@router.post("/feedback")
 def create_feedback(
+    session: Session,
     feedback: FeedbackCreate,
-    session: Session = Depends(get_session)
 ):
-    db_feedback = Feedback(**feedback.model_dump())
+    db_feedback = Feedback(
+        user_id=feedback.user_id,
+        message_type=feedback.message_type,
+        message=feedback.message,
+    )
     session.add(db_feedback)
     session.commit()
     session.refresh(db_feedback)
