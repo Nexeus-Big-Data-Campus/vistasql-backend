@@ -1,14 +1,30 @@
-from fastapi import FastAPI
+import os
+from fastapi import FastAPI, Depends, HTTPException
+from sqlmodel import SQLModel, Session
+from typing import Annotated
 from src.db import engine
-from sqlmodel import SQLModel
-from src.models import User
+from src.crud import get_user_by_email, create_user
+from src.security import create_jwt_token
+from src.dto import UserCreate
+from datetime import timedelta
 
-app = FastAPI()
+ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
+dosc_url = "/docs" if ENVIRONMENT != "prod" else None
+app = FastAPI(docs_url=dosc_url, redoc_url=None)
 
 @app.on_event("startup")
 def on_startup():
     SQLModel.metadata.create_all(engine)
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+def get_session():
+    with Session(engine) as session:
+        yield session
+
+@app.post("/sign-in")
+def register_user(user: UserCreate, session: Annotated[Session, Depends(get_session)]):
+    new_user = create_user(session, user)
+    if new_user is None:
+        raise HTTPException(status_code=400, detail="Email already exsists")
+
+    token = new_user.get_jtw_token()
+    return {"access_token": token, "token_type": "bearer"}
