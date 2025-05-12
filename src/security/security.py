@@ -34,6 +34,7 @@ def create_jwt_token(data: dict):
     return jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 def decode_jwt_token(token: str):
+<<<<<<< HEAD
     try:
         # se usa jwt.PyJWTError que es la excepcion base de PyJWT
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
@@ -91,3 +92,7 @@ async def get_current_user(
             detail="Usuario no encontrado",
         )
     return user
+=======
+    payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+    return payload
+>>>>>>> develop
