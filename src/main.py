@@ -6,15 +6,19 @@ from src.db import engine
 from src.crud import get_user_by_email, create_user
 from src.security import create_jwt_token
 from src.dto import UserCreate
-from datetime import timedelta
+from datetime import timedeltaç
+import user
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
 dosc_url = "/docs" if ENVIRONMENT != "prod" else None
-app = FastAPI(docs_url=dosc_url, redoc_url=None)
+from contextlib import asynccontextmanager
 
-@app.on_event("startup")
-def on_startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     SQLModel.metadata.create_all(engine)
+    yield
+
+app = FastAPI(docs_url=dosc_url, redoc_url=None, lifespan=lifespan)
 
 def get_session():
     with Session(engine) as session:
