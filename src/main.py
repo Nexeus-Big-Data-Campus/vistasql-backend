@@ -8,7 +8,7 @@ from src.crud import get_user_by_email, create_user
 from src.security import create_jwt_token
 from src.dto import UserCreate
 from datetime import datetime
-from user import User, UserAction, UserSession
+from user import User, UserSession
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
 dosc_url = "/docs" if ENVIRONMENT != "prod" else None
@@ -37,7 +37,6 @@ def register_user(user: UserCreate, session: Annotated[Session, Depends(get_sess
 
 @app.post("/sign-out")
 def logout_user(user_id: int, session: Annotated[Session, Depends(get_session)]):
-    # Finalizar la sesión del usuario
     user_session = session.query(UserSession).filter(
         UserSession.user_id == user_id, UserSession.end_time == None
     ).first()
