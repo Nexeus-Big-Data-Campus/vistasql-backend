@@ -27,7 +27,6 @@ def get_session():
 
 @app.post("/sign-in")
 def register_user(user: UserCreate, session: Annotated[Session, Depends(get_session)]):
-    # Ingresar un nuevo usuario
     new_user = create_user(session, user)
     if new_user is None:
         raise HTTPException(status_code=400, detail="Email already exsists")
