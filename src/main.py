@@ -18,8 +18,7 @@ app.middleware("http")(auth_middleware)
 
 @app.on_event("startup")
 def on_startup():
-    
-    #           SQLModel.metadata.drop_all(engine)
+
     SQLModel.metadata.create_all(engine)
 
 def get_session():
