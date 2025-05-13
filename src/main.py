@@ -9,6 +9,7 @@ from src.dto import UserCreate, FeedbackCreate
 from src.models import User
 from src.security import create_jwt_token, get_current_user, get_session, verify_password 
 
+
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
 docs_url = "/docs" if ENVIRONMENT != "prod" else None
 app = FastAPI(title="VistaSQL API", docs_url=docs_url, redoc_url=None)
@@ -37,7 +38,8 @@ def register_user(user_data: UserCreate, session: Annotated[Session, Depends(get
          )
     
     token_data = {'id': new_user.id, 'email': new_user.email, 'name': new_user.name}
-    token = create_jwt_token(data=token_data)
+    #from src.models import get_jwt_token
+    token = new_user.get_jwt_token()
     
     return {"access_token": token, "token_type": "bearer"}
 
@@ -60,12 +62,6 @@ def login_for_access_token(
     token = create_jwt_token(data=token_data)
 
     return {"access_token": token, "token_type": "bearer"}
-
-@app.get("/users/me", response_model=User) 
-async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
-    """Devuelve los datos del usuario autenticado."""
-    
-    return current_user
 
 @app.get("/items")
 async def read_items(current_user: Annotated[User, Depends(get_current_user)]):
