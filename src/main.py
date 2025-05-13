@@ -1,22 +1,25 @@
 import os
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm 
+from fastapi import FastAPI, Depends, HTTPException, status, Request
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import SQLModel, Session
 from typing import Annotated
 from src.db import engine, db 
-from src.crud import create_user, get_user_by_email, create_feedback, get_user_by_id
+from src.crud import create_user, get_user_by_email, create_feedback
 from src.dto import UserCreate, FeedbackCreate
 from src.models import User
-from src.security import create_jwt_token, get_current_user, get_session, verify_password 
+from src.security import create_jwt_token, get_current_user, get_session, verify_password
+from src.middleware.auth_middleware import auth_middleware
 
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
-docs_url = "/docs" if ENVIRONMENT != "prod" else None
-app = FastAPI(title="VistaSQL API", docs_url=docs_url, redoc_url=None)
+dosc_url = "/docs" if ENVIRONMENT != "prod" else None
+app = FastAPI(docs_url=dosc_url, redoc_url=None)
+
+
+app.middleware("http")(auth_middleware)
 
 @app.on_event("startup")
 def on_startup():
-    """Crea las tablas en la base de datos al iniciar."""
     SQLModel.metadata.create_all(engine)
 
 @app.post("/sign-up", status_code=status.HTTP_201_CREATED) 
@@ -37,11 +40,12 @@ def register_user(user_data: UserCreate, session: Annotated[Session, Depends(get
             detail="No se pudo crear el usuario."
          )
     
-    token_data = {'id': new_user.id, 'email': new_user.email, 'name': new_user.name}
+    #token_data = {'id': new_user.id, 'email': new_user.email, 'name': new_user.name}
     #from src.models import get_jwt_token
     token = new_user.get_jwt_token()
     
     return {"access_token": token, "token_type": "bearer"}
+
 
 @app.post("/sign-in")
 def login_for_access_token(
@@ -58,8 +62,8 @@ def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    token_data = {'id': user.id, 'email': user.email, 'name': user.name}
-    token = create_jwt_token(data=token_data)
+    #token_data = {'id': user.id, 'email': user.email, 'name': user.name}
+    token = user.get_jwt_token()
 
     return {"access_token": token, "token_type": "bearer"}
 
@@ -90,3 +94,4 @@ def add_feedback(
          )
     
     return db_feedback
+

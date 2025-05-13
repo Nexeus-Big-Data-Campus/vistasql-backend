@@ -9,6 +9,7 @@ from sqlmodel import Session
 from src.db import engine 
 from src.models import User
 from src.crud.user_crud import get_user_by_id
+from fastapi import Request
 
 
 
@@ -60,21 +61,22 @@ def get_session():
 
 async def get_current_user(
     
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
+    #credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
+    request: Request,
     session: Annotated[Session, Depends(get_session)] 
 ) -> User:
     credential_exception = HTTPException(
         status_code= status.HTTP_401_UNAUTHORIZED,
         detail="No se pudieron validar las credenciales",
-        headers={"WWW-Authenticate": "Bearer"},
+        #headers={"WWW-Authenticate": "Bearer"},
     )
     
-    token= credentials.credentials
-
-    payload = decode_jwt_token(token)
-    if payload is None:
+    #token= credentials.credentials
+    if not hasattr(request.state, "user") or request.state.user is None:
         raise credential_exception
-    
+
+    payload = request.state.user
+       
     user_id: Optional[str] = payload.get("id")
     if user_id is None:
         raise credential_exception 
