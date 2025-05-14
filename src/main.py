@@ -5,18 +5,20 @@ from typing import Annotated
 from src.db import engine
 from src.crud import create_user, create_feedback
 from src.dto import UserCreate, FeedbackCreate
+from src.routes import auth
+from src.db.db import get_session
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
 dosc_url = "/docs" if ENVIRONMENT != "prod" else None
 app = FastAPI(docs_url=dosc_url, redoc_url=None)
+app.include_router(auth.router)
+
 
 @app.on_event("startup")
 def on_startup():
     SQLModel.metadata.create_all(engine)
 
-def get_session():
-    with Session(engine) as session:
-        yield session
+
 
 @app.post("/sign-in")
 def register_user(user: UserCreate, session: Annotated[Session, Depends(get_session)]):
