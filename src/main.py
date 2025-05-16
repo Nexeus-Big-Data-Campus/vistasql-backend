@@ -5,7 +5,7 @@ from sqlmodel import SQLModel
 from src.db import engine
 from fastapi.middleware.cors import CORSMiddleware
 from src.middleware.auth_middleware import auth_middleware
-from src.routes import auth, feedback, session
+from src.routes import auth, feedback, session, users
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
 dosc_url = "/docs" if ENVIRONMENT != "prod" else None
@@ -21,5 +21,6 @@ async def lifespan(app: FastAPI):
     yield
 
 app.include_router(auth.router)
+app.include_router(users.router, prefix="/users")
 app.include_router(feedback.router, prefix="/feedback")
 app.include_router(session.router, prefix="/session")
