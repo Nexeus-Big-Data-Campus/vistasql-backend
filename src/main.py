@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import SQLModel, Session
 from typing import Annotated
 from src.db import engine
-from src.crud import create_user, create_feedback
+from src.crud import create_user, create_feedback, delete_user
 from src.dto import UserCreate, FeedbackCreate
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
@@ -33,3 +33,10 @@ def add_feedback(
     session: Annotated[Session, Depends(get_session)],
 ):
     return create_feedback(session, feedback)
+
+@app.delete("/users/{user_id}")
+def remove_user(user_id: str, session: Annotated[Session, Depends(get_session)]):
+    success = delete_user(session, user_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "User deleted successfully"}
