@@ -5,7 +5,7 @@ from sqlmodel import SQLModel
 from src.db import engine
 from fastapi.middleware.cors import CORSMiddleware
 from src.middleware.auth_middleware import auth_middleware
-from src.routes import auth, feedback, session, users
+from src.routes import auth, feedback, session, users, admin
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
 dosc_url = "/docs" if ENVIRONMENT != "prod" else None
@@ -24,3 +24,4 @@ app.include_router(auth.router)
 app.include_router(users.router, prefix="/users")
 app.include_router(feedback.router, prefix="/feedback")
 app.include_router(session.router, prefix="/session")
+app.include_router(admin.router, prefix="/admin")
