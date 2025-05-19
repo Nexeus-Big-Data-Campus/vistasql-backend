@@ -40,3 +40,5 @@ def remove_user(user_id: str, session: Annotated[Session, Depends(get_session)])
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
     return {"message": "User deleted successfully"}
+
+print("DATABASE_URL =>", os.getenv("DATABASE_URL"))

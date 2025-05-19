@@ -9,6 +9,10 @@ def get_user_by_email(session: Session, email: str) -> Optional[User]:
     statement = select(User).where(User.email == email)
     return session.exec(statement).first()
 
+def get_user_by_id(session: Session, user_id: str) -> Optional[User]:
+    statement = select(User).where(User.id == user_id)
+    return session.exec(statement).first()
+
 def create_user(session: Session, user_in: UserCreate) -> Optional[User]:
     existing_user = get_user_by_email(session, user_in.email)
     if existing_user:
