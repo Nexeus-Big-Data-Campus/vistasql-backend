@@ -5,7 +5,7 @@ from src.models import User
 from datetime import datetime, timedelta
 from src.routes.auth import get_current_user
 
-router = APIRouter(prefix="/admin")
+router = APIRouter()
 
 def admin_required(user=Depends(get_current_user)):
     if user.role != "admin":

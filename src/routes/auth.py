@@ -13,6 +13,10 @@ import os
 
 router = APIRouter()
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your_jwt_secret_key")
+ALGORITHM = "HS256"
+
 @router.post("/signin")
 def register_user(user: UserCreate, session: Annotated[Session, Depends(get_session)]):
     new_user = create_user(session, user)
@@ -31,10 +35,6 @@ def login_user(login: UserLogin, session: Annotated[Session, Depends(get_session
     token = user.get_jwt_token()
     return {"access_token": token, "token_type": "bearer"}
 
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your_jwt_secret_key")
-ALGORITHM = "HS256"
 
 
 def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Depends(get_session)) -> User:
