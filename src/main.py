@@ -1,14 +1,14 @@
-# src/main.py
 import os
+from datetime import datetime
 from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import SQLModel, Session
 from typing import Annotated
+from models.user import User, UserSession
 from src.db import engine
 from src.crud import get_user_by_email, create_user, create_feedback
-from src.security import create_jwt_token
 from src.dto import UserCreate, FeedbackCreate
-from datetime import datetime
-from models.user import User, UserSession
+from src.routes import users as users_router  
+from src.security import create_jwt_token
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
 dosc_url = "/docs" if ENVIRONMENT != "prod" else None
@@ -20,6 +20,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(docs_url=dosc_url, redoc_url=None, lifespan=lifespan)
+app.include_router(users_router.router)  
 
 def get_session():
     with Session(engine) as session:
@@ -55,7 +56,6 @@ def logout_user(
             status_code=404,
             detail="Session not found or already closed"
         )
-
 
 @app.post("/feedback")
 def add_feedback(
