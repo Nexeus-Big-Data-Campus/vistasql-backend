@@ -3,4 +3,3 @@ sqlmodel
 psycopg2-binary
 passlib[bcrypt]
 pyjwt
-python-jose

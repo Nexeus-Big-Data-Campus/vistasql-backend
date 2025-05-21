@@ -6,7 +6,8 @@ from src.dto import UserCreate, UserLogin
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from src.models import User
-from jose import JWTError, jwt
+from src.security.security import decode_jwt_token
+import jwt
 import os
 
 
@@ -44,13 +45,15 @@ def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Dep
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = decode_jwt_token(token)
         user_id: str = payload.get("id")
         if user_id is None:
             raise credentials_exception
-    except JWTError:
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
         raise credentials_exception
-
+    
     user = session.get(User, user_id)
     if user is None:
         raise credentials_exception
