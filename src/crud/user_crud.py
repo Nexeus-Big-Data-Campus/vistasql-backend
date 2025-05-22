@@ -19,10 +19,12 @@ def create_user(session: Session, user_in: UserCreate) -> Optional[User]:
         return None
             
     hashed_password = get_password_hash(user_in.password)
+    from src.models.user import Role
     db_user = User(
         email=user_in.email, 
         password=hashed_password, 
-        name=user_in.name)
+        name=user_in.name,
+        role=Role.client)
     
     session.add(db_user)
     session.commit()
@@ -32,7 +34,7 @@ def create_user(session: Session, user_in: UserCreate) -> Optional[User]:
 
 def delete_user(session: Session, user_id: str) -> bool:
     user = session.get(User, user_id)    
-    
+
     if user:
         session.delete(user)
         session.commit()
