@@ -7,8 +7,8 @@ from fastapi import Depends, HTTPException,status, FastAPI, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError
 from pydantic import BaseModel
-from src.db.db import get_session as get_db
-from sqlalchemy.orm import Session
+from src.db.db import get_session
+from src.models import User
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -25,22 +25,13 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     email: str | None = None
 
-
-class User(BaseModel):
-    username: str
-    email: str | None = None
-    full_name: str | None = None
-    disabled: bool | None = None
-    role: Optional[str] = "client" 
-
-
 class UserInDB(User):
     hashed_password: str
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 app = FastAPI()
 
@@ -59,59 +50,12 @@ def create_jwt_token(data: dict):
     to_encode.update({"exp": expiration_date, "sub":data.get("email")})
     return jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
+
 def decode_jwt_token(token: str):
     payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
     return payload
     
-async def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
-    db: Annotated[Session, Depends(get_db)]
-):
-    from src.crud import get_user_by_email
 
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="No se pueden validar las credenciales.",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    
-    try:
-        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
-        email = payload.get("sub")
-        if email is None:
-            raise credentials_exception
-        token_data = TokenData(email=email)
-    except JWTError:
-        raise credentials_exception
-
-    user = get_user_by_email(db, email=token_data.email)  # <-- Ahora sí con 'db'
-    if user is None:
-        raise credentials_exception
-    return user
-
-@router.get("/users/{user_id}",response_model=User)
-async def get_user_profile(user_id: str, current_user=Depends(get_current_user)):
-    from src.crud.user_crud import get_user_by_id
-
-    user = get_user_by_id(user_id)
-    status_exception = HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Las credenciales introducidas no se corresponden con las suyas.",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    if user is None:
-        raise status_exception
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="Las credenciales introducidas no se corresponden con las suyas.",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    
-    user = User(username=user.username,email=user.email,full_name=user.full_name,disabled=False,role="client")
-
-    if user.email != current_user.email:
-        raise credentials_exception
-    
 
 
 

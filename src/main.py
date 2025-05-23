@@ -1,22 +1,23 @@
 from contextlib import asynccontextmanager
 import os
-from fastapi import FastAPI
-from sqlmodel import SQLModel
+from fastapi import FastAPI, Depends, HTTPException
+from sqlmodel import SQLModel, Session
 from src.db import engine
-from src.crud import create_user, create_feedback, delete_user
+from src.crud import create_user, create_feedback, delete_user, get_user_by_email
 from src.dto import UserCreate, FeedbackCreate
+from src.dto.user import UserProfile
 from src.middleware.auth_middleware import auth_middleware
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import Depends, HTTPException
 from typing import Annotated
-from sqlmodel import Session
 from src.routes import session
-from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
 from src.db.db import get_session as get_db
 from src.security.security import create_jwt_token, verify_password, Token
-from src.crud import get_user_by_email
+from src.crud.user_crud import get_current_user
+from src.models import User
+from dotenv import load_dotenv
+load_dotenv()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -41,7 +42,11 @@ def register_user(user: UserCreate, session: Annotated[Session, Depends(get_sess
     if new_user is None:
         raise HTTPException(status_code=400, detail="Email already exists")
 
-    token = new_user.get_jwt_token()
+    token = create_jwt_token({
+        "id": new_user.id,
+        "email": new_user.email,
+        "name": new_user.name
+    })
     return {
         "id": new_user.id, 
         "access_token": token,
@@ -56,14 +61,15 @@ def add_feedback(
 ):
     return create_feedback(session, feedback)
 
-@app.post("/token", response_model=Token)
+#Creando el token que se genera en la sesión
+@app.post("/login", response_model=Token)
 async def login_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
     user = get_user_by_email(db, email=form_data.username)
     if not user or not verify_password(form_data.password, user.password):
-        raise HTTPException(status_code=400, detail="Invalid credentials")
+        raise HTTPException(status_code=400, detail="Las credenciales introducidas no son válidas")
 
     access_token = create_jwt_token({
         "id": user.id,
@@ -73,10 +79,21 @@ async def login_token(
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "user_id": user.id  # Puedes quitar esto si no está en tu modelo de respuesta
+        "user_id": user.id 
     }
 
-
+#Creando un endpoint para que el usuario pueda ver sus datos      
+@app.get("/profile", response_model=UserProfile)  
+def get_profile(current_user: User = Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "username": current_user.name,
+        "email": current_user.email,
+        "role": current_user.role,
+        "created_at": current_user.created_at
+    }
+    
+#Creando el endpoint de eliminación de usuario    
 @app.delete("/users/{user_id}")
 def remove_user(user_id: str, session: Annotated[Session, Depends(get_session)]):
     success = delete_user(session, user_id)
