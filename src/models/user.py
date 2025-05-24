@@ -2,7 +2,7 @@ import uuid
 from sqlmodel import SQLModel, Field
 from typing import Optional
 from src.security import create_jwt_token, verify_password
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 class Role(str, Enum):
@@ -19,7 +19,7 @@ class User(SQLModel, table=True):
     email: str = Field(index=True, unique=True)
     password: str
     role: Role = Field(default=Role.client)  
-    created_at: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     def get_jwt_token(self):
         return create_jwt_token({
@@ -33,6 +33,6 @@ class User(SQLModel, table=True):
         
 class UserSession(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="user.id")  
+    user_id: str = Field(foreign_key="user.id")  
     start_time: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
     end_time: Optional[datetime] = None
