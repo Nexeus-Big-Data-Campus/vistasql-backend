@@ -8,11 +8,7 @@ from src.db.db import get_session
 from src.models import User
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from src.security.security import decode_jwt_token
-
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/sign-in")  
-
+from src.security.security import decode_jwt_token, oauth2_scheme
 
 
 def get_user_by_email(session: Session, email: str) -> Optional[User]:

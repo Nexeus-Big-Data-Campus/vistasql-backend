@@ -85,13 +85,16 @@ async def login_token(
 #Creando un endpoint para que el usuario pueda ver sus datos      
 @app.get("/profile", response_model=UserProfile)  
 def get_profile(current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code= 404, detail="No se ha encontrado ningún usuario")
+    
     return {
         "id": current_user.id,
-        "username": current_user.name,
+        "name": current_user.name,
         "email": current_user.email,
         "role": current_user.role,
         "created_at": current_user.created_at
-    }
+        }
     
 #Creando el endpoint de eliminación de usuario    
 @app.delete("/users/{user_id}")
