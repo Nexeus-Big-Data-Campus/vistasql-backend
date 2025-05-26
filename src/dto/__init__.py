@@ -1,2 +1,2 @@
-from .user import UserCreate
+from .user import UserCreate, UserLogin
 from .feedback import FeedbackCreate
