@@ -5,11 +5,11 @@ from src.db import get_session
 from src.dto import UserCreate, UserLogin
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from src.models import User
+from src.models import User, UserSession
 from src.security.security import decode_jwt_token
 import jwt
 import os
-
+from datetime import datetime
 
 
 router = APIRouter()
@@ -33,6 +33,11 @@ def login_user(login: UserLogin, session: Annotated[Session, Depends(get_session
     if user is None or not user.verify_password(login.password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
+    user_session = UserSession(user_id=user.id, start_time=datetime.utcnow())
+    session.add(user_session)
+    session.commit()
+    session.refresh(user_session)
+    
     token = user.get_jwt_token()
     return {"access_token": token, "token_type": "bearer"}
 
