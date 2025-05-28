@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select, func
 from src.db import get_session
-from src.models import User
+from src.models import User, UserSession
 from datetime import datetime, timedelta
 from src.routes.auth import get_current_user
 
@@ -29,3 +29,22 @@ def user_registrations(session: Session = Depends(get_session)):
         .order_by(func.date(User.created_at))
     ).all()
     return [{"date": str(date), "count": count} for date, count in results]
+
+@router.get("/average-session-duration", dependencies=[Depends(admin_required)])
+def average_session_duration(session: Session = Depends(get_session)):
+    sessions = session.exec(
+        select(UserSession).where(UserSession.end_time.is_not(None))
+    ).all()
+    if not sessions:
+        return {"average_duration": "00:00:00"}
+
+    total_seconds = sum(
+        (s.end_time - s.start_time).total_seconds() for s in sessions
+    )
+    avg_seconds = int(total_seconds // len(sessions))
+    hours = avg_seconds // 3600
+    minutes = (avg_seconds % 3600) // 60
+    seconds = avg_seconds % 60
+    avg_duration_str = f"{hours:02}:{minutes:02}:{seconds:02}"
+
+    return {"average_duration": avg_duration_str}
