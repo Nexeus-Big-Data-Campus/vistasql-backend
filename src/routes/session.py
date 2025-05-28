@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Annotated
 from sqlmodel import Session
-from src.db import get_session
+from src.db.db import get_session
 from src.models import UserSession
 from fastapi import APIRouter, Depends, HTTPException
 

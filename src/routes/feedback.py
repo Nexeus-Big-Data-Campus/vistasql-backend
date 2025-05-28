@@ -2,7 +2,7 @@ from typing import Annotated
 
 from sqlmodel import Session
 from src.crud import create_feedback
-from src.db import get_session
+from src.db.db import get_session
 from src.dto import FeedbackCreate
 from fastapi import APIRouter, Depends
 

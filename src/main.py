@@ -5,7 +5,7 @@ from sqlmodel import SQLModel
 from src.db import engine
 from fastapi.middleware.cors import CORSMiddleware
 from src.middleware.auth_middleware import auth_middleware
-from src.routes import auth, feedback, session, users, admin
+from src.routes import auth, feedback, session, users, admin, profile
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,3 +27,4 @@ app.include_router(users.router, prefix="/users")
 app.include_router(feedback.router, prefix="/feedback")
 app.include_router(session.router, prefix="/session")
 app.include_router(admin.router, prefix="/admin")
+app.include_router(profile.router, prefix="/users", tags=["Users"])

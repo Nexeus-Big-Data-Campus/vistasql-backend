@@ -2,7 +2,7 @@ from typing import Annotated
 from sqlmodel import Session
 from fastapi import APIRouter, Depends, HTTPException
 from src.crud import delete_user
-from src.db import get_session
+from src.db.db import get_session
 
 router = APIRouter()
 

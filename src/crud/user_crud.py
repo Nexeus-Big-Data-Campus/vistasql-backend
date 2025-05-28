@@ -2,7 +2,7 @@ from sqlmodel import Session, select
 from typing import Optional
 from src.models import User
 from src.dto import UserCreate
-from src.security import get_password_hash
+from src.security.security import get_password_hash
 
 
 def get_user_by_email(session: Session, email: str) -> Optional[User]:
