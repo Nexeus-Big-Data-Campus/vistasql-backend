@@ -15,7 +15,8 @@ def admin_required(user=Depends(get_current_user)):
 @router.get("/user-stats", dependencies=[Depends(admin_required)])
 def user_stats(session: Session = Depends(get_session)):
     total = session.exec(select(func.count()).select_from(User)).one()
-    last_month = datetime.now() - timedelta(days=30)
+    last_month = datetime.now()
+    last_month = last_month.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     last_month_count = session.exec(
         select(func.count()).select_from(User).where(User.created_at >= last_month)
     ).one()
@@ -48,3 +49,4 @@ def average_session_duration(session: Session = Depends(get_session)):
     avg_duration_str = f"{hours:02}:{minutes:02}:{seconds:02}"
 
     return {"average_duration": avg_duration_str}
+
