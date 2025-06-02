@@ -50,3 +50,16 @@ def average_session_duration(session: Session = Depends(get_session)):
 
     return {"average_duration": avg_duration_str}
 
+@router.get("/users_data", dependencies=[Depends(admin_required)])
+def users_data(session: Session = Depends(get_session)):
+    active_users = session.exec(
+        select(User)
+    ).all()
+    return [{"id": user.id, "username": user.username, "email": user.email, "role": user.role} for user in active_users]
+
+@router.get("/users_feedback", dependencies=[Depends(admin_required)])
+def users_feedback(session: Session = Depends(get_session)):
+    feedbacks = session.exec(
+        select(UserSession).where(UserSession.feedback.is_not(None))
+    ).all()
+    return [{"user_id": feedback.user_id, "feedback": feedback.feedback} for feedback in feedbacks]
