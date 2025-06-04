@@ -33,4 +33,3 @@ def delete_user(session: Session, user_id: str) -> bool:
         session.delete(user)
         session.commit()
         return True
-    return False

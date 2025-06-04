@@ -1,3 +1,4 @@
+# src/middleware/auth_middleware.py
 from fastapi import FastAPI, Request, HTTPException
 from jwt import decode, exceptions
 from src.security.security import JWT_SECRET_KEY, decode_jwt_token

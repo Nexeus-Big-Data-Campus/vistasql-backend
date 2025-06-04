@@ -1,8 +1,9 @@
+#src/models/user.py
 import uuid
 from sqlmodel import SQLModel, Field
 from typing import Optional
-from src.security import create_jwt_token
-from datetime import datetime
+from src.security import create_jwt_token, verify_password
+from datetime import datetime, timezone
 from enum import Enum
 
 class Role(str, Enum):

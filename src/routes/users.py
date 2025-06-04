@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, Header, HTTPException
 from typing import Annotated
 from sqlmodel import Session
-from src.crud import delete_user
+from src.crud import create_feedback
+from crud.user_crud import delete_user
 from src.db import get_session
+from src.dto import FeedbackCreate
 from src.dto.user import UserUpdate
 from src.models import User  
-from src.security.security import get_current_user  , get_user_from_token
+from src.security.security import get_current_user
+from src.routes.auth import get_user_from_token
 
 router = APIRouter(prefix="/users")
 
@@ -79,3 +82,10 @@ def get_user_profile(
         "nombre": user_db.name,
         "role": user_db.role
     }
+        
+@router.post("/")
+def add_feedback(
+    feedback: FeedbackCreate,
+    session: Annotated[Session, Depends(get_session)],
+):
+    return create_feedback(session, feedback)

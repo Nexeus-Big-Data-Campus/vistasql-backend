@@ -1,4 +1,6 @@
+# src/main.py
 import os
+from contextlib import asynccontextmanager
 from datetime import datetime
 from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import SQLModel, Session
@@ -9,6 +11,11 @@ from src.crud import get_user_by_email, create_user, create_feedback
 from src.dto import UserCreate, FeedbackCreate
 from src.routes import users as users_router  
 from src.security import create_jwt_token
+from fastapi.middleware.cors import CORSMiddleware
+from src.middleware.auth_middleware import auth_middleware
+from src.routes import auth, feedback, session, users
+from crud.user_crud import delete_user
+from src.db.db import get_session
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
 dosc_url = "/docs" if ENVIRONMENT != "prod" else None
@@ -22,9 +29,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(docs_url=dosc_url, redoc_url=None, lifespan=lifespan)
 app.include_router(users_router.router)  
 
-def get_session():
-    with Session(engine) as session:
-        yield session
+app.middleware("http")(auth_middleware)
+# TODO: Allow production url on prod environment
+app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_credentials=["*"], allow_methods=["*"], allow_headers=["*"])
 
 @app.post("/sign-in")
 def register_user(user: UserCreate, session: Annotated[Session, Depends(get_session)]):
@@ -69,3 +76,15 @@ def get_user_sessions(user_id: int, session: Annotated[Session, Depends(get_sess
     #Obtener las sesiones del usuario
     sessions = session.query(UserSession).filter(UserSession.user_id == user_id).all()
     return sessions
+
+@router.delete("/{user_id}")
+def remove_user(user_id: str, session: Annotated[Session, Depends(get_session)]):
+    success = delete_user(session, user_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "User deleted successfully"}
+
+app.include_router(auth.router)
+app.include_router(users.router, prefix="/users")
+app.include_router(feedback.router, prefix="/feedback")
+app.include_router(session.router, prefix="/session")
