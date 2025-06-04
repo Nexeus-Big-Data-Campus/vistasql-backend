@@ -2,7 +2,8 @@
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Request, Security
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlmodel import SQLModel, Session
 from typing import Annotated
 from models.user import User, UserSession
@@ -10,16 +11,16 @@ from src.db import engine
 from src.crud import get_user_by_email, create_user, create_feedback
 from src.dto import UserCreate, FeedbackCreate
 from src.routes import users as users_router  
+from src.routes.users import add_feedback as feedback
 from src.security import create_jwt_token
 from fastapi.middleware.cors import CORSMiddleware
 from src.middleware.auth_middleware import auth_middleware
-from src.routes import auth, feedback, session, users
+from src.routes import auth, session, users
 from crud.user_crud import delete_user
 from src.db.db import get_session
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
 dosc_url = "/docs" if ENVIRONMENT != "prod" else None
-from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -71,13 +72,14 @@ def add_feedback(
 ):
     return create_feedback(session, feedback)
 
+
 @app.get("/user-sessions/{user_id}")
 def get_user_sessions(user_id: int, session: Annotated[Session, Depends(get_session)]):
     #Obtener las sesiones del usuario
     sessions = session.query(UserSession).filter(UserSession.user_id == user_id).all()
     return sessions
 
-@router.delete("/{user_id}")
+@users_router.router.delete("/{user_id}")
 def remove_user(user_id: str, session: Annotated[Session, Depends(get_session)]):
     success = delete_user(session, user_id)
     if not success:
