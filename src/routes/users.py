@@ -1,13 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 from typing import Annotated
 from sqlmodel import Session
 from src.crud import delete_user
 from src.db import get_session
 from src.dto.user import UserUpdate
 from src.models import User  
-from src.security.security import get_current_user  
+from src.security.security import get_current_user  , get_user_from_token
 
-router = APIRouter()
+router = APIRouter(prefix="/users")
 
 @router.get("/me")
 def get_current_user_data(
@@ -50,3 +50,32 @@ def remove_user(
     if not success:
         raise HTTPException(404, "Usuario no encontrado")
     return {"message": "Cuenta eliminada exitosamente"}
+
+@router.get("/{id_usuario}")
+def get_user_profile(
+    id_usuario: str,  
+    current_user: dict = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    """
+    Devuelve los datos del usuario desde la base de datos,
+    y verifica que el usuario autenticado sea el mismo que el solicitado.
+    """
+    if current_user["id"] != id_usuario:
+        raise HTTPException(
+            status_code=403,
+            detail="No tienes permiso para ver estos datos"
+        )
+    user_db = session.get(User, id_usuario)
+
+    if not user_db:
+        raise HTTPException(
+            status_code=404,
+            detail="Usuario no encontrado"
+        )
+    return {
+        "id": user_db.id,
+        "email": user_db.email,
+        "nombre": user_db.name,
+        "role": user_db.role
+    }
