@@ -1,6 +1,7 @@
 import uuid
 from sqlmodel import SQLModel, Field
 from typing import Optional
+from src.security import create_jwt_token, verify_password
 from datetime import datetime, timezone
 from enum import Enum
 
@@ -37,5 +38,5 @@ class User(SQLModel, table=True):
 class UserSession(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: str = Field(foreign_key="user.id")  
-    start_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    start_time: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
     end_time: Optional[datetime] = None
