@@ -1,4 +1,3 @@
-# src/main.py
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -19,17 +18,16 @@ from src.routes import auth, session, users
 from crud.user_crud import delete_user
 from src.db.db import get_session
 
-ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
-dosc_url = "/docs" if ENVIRONMENT != "prod" else None
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     SQLModel.metadata.create_all(engine)
     yield
+    
+ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
+dosc_url = "/docs" if ENVIRONMENT != "prod" else None
 
 app = FastAPI(docs_url=dosc_url, redoc_url=None, lifespan=lifespan)
 app.include_router(users_router.router)  
-
 app.middleware("http")(auth_middleware)
 # TODO: Allow production url on prod environment
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_credentials=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -72,7 +70,6 @@ def add_feedback(
 ):
     return create_feedback(session, feedback)
 
-
 @app.get("/user-sessions/{user_id}")
 def get_user_sessions(user_id: int, session: Annotated[Session, Depends(get_session)]):
     #Obtener las sesiones del usuario
@@ -90,3 +87,4 @@ app.include_router(auth.router)
 app.include_router(users.router, prefix="/users")
 app.include_router(feedback.router, prefix="/feedback")
 app.include_router(session.router, prefix="/session")
+# app.include_router(admin.router, prefix="/admin")
