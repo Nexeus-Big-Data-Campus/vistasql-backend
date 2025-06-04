@@ -22,6 +22,8 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     def get_jwt_token(self):
+        from src.security import create_jwt_token
+
         return create_jwt_token({
             'id': self.id,
             'name': self.name,
@@ -29,6 +31,8 @@ class User(SQLModel, table=True):
         })
     
     def verify_password(self, password: str) -> bool:
+        from src.security import verify_password
+
         return verify_password(password, self.password)
         
 class UserSession(SQLModel, table=True):
