@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends, Header, HTTPException
 from typing import Annotated
 from sqlmodel import Session
-from src.crud import create_feedback
-from crud.user_crud import delete_user
+from src.crud import create_feedback, delete_user
 from src.db import get_session
 from src.dto import FeedbackCreate
 from src.dto.user import UserUpdate
