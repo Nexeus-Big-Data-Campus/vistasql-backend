@@ -1,22 +1,13 @@
 import os
 from contextlib import asynccontextmanager
-from datetime import datetime
-from fastapi import FastAPI, Depends, HTTPException, Request, Security
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlmodel import SQLModel, Session
-from typing import Annotated
-from models.user import User, UserSession
+from fastapi import FastAPI
+from sqlmodel import SQLModel
 from src.db import engine
-from src.crud import get_user_by_email, create_user, create_feedback
-from src.dto import UserCreate, FeedbackCreate
 from src.routes import users as users_router  
 from src.routes.users import add_feedback as feedback
-from src.security import create_jwt_token
 from fastapi.middleware.cors import CORSMiddleware
 from src.middleware.auth_middleware import auth_middleware
 from src.routes import auth, session, users
-from crud.user_crud import delete_user
-from src.db.db import get_session
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

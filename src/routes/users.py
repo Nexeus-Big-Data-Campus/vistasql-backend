@@ -8,7 +8,6 @@ from src.dto import FeedbackCreate
 from src.dto.user import UserUpdate
 from src.models import User  
 from src.security.security import get_current_user
-from src.routes.auth import get_user_from_token
 
 router = APIRouter(prefix="/users")
 
