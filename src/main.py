@@ -32,57 +32,6 @@ app.middleware("http")(auth_middleware)
 # TODO: Allow production url on prod environment
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_credentials=["*"], allow_methods=["*"], allow_headers=["*"])
 
-@app.post("/sign-in")
-def register_user(user: UserCreate, session: Annotated[Session, Depends(get_session)]):
-    new_user = create_user(session, user)
-    if new_user is None:
-        raise HTTPException(status_code=400, detail="Email already exsists")
-    
-    token = new_user.get_jwt_token()
-    return {"access_token": token, "token_type": "bearer"}
-
-@app.post("/sign-out")
-def logout_user(
-    session_id: int,
-    session: Annotated[Session, Depends(get_session)]
-):
-    user_session = session.query(UserSession).filter(
-        UserSession.id == session_id,
-        UserSession.end_time == None
-    ).first()
-
-    if user_session:
-        user_session.end_time = datetime.now(datetime.timezone.utc)
-        duration = user_session.end_time - user_session.start_time
-        user_session.duration = int(duration.total_seconds())
-        session.commit()
-        return {"message": "Session closed successfully"}
-    else:
-        raise HTTPException(
-            status_code=404,
-            detail="Session not found or already closed"
-        )
-
-@app.post("/feedback")
-def add_feedback(
-    feedback: FeedbackCreate,
-    session: Annotated[Session, Depends(get_session)],
-):
-    return create_feedback(session, feedback)
-
-@app.get("/user-sessions/{user_id}")
-def get_user_sessions(user_id: int, session: Annotated[Session, Depends(get_session)]):
-    #Obtener las sesiones del usuario
-    sessions = session.query(UserSession).filter(UserSession.user_id == user_id).all()
-    return sessions
-
-@users_router.router.delete("/{user_id}")
-def remove_user(user_id: str, session: Annotated[Session, Depends(get_session)]):
-    success = delete_user(session, user_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="User not found")
-    return {"message": "User deleted successfully"}
-
 app.include_router(auth.router)
 app.include_router(users.router, prefix="/users")
 app.include_router(feedback.router, prefix="/feedback")
