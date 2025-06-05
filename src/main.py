@@ -1,13 +1,11 @@
-import os
 from contextlib import asynccontextmanager
+import os
 from fastapi import FastAPI
 from sqlmodel import SQLModel
 from src.db import engine
-from src.routes import users as users_router  
-from src.routes.users import add_feedback as feedback
 from fastapi.middleware.cors import CORSMiddleware
 from src.middleware.auth_middleware import auth_middleware
-from src.routes import auth, session, users
+from src.routes import auth, feedback, session, users, admin
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -16,9 +14,8 @@ async def lifespan(app: FastAPI):
     
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
 dosc_url = "/docs" if ENVIRONMENT != "prod" else None
-
 app = FastAPI(docs_url=dosc_url, redoc_url=None, lifespan=lifespan)
-app.include_router(users_router.router)  
+
 app.middleware("http")(auth_middleware)
 # TODO: Allow production url on prod environment
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_credentials=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -27,4 +24,4 @@ app.include_router(auth.router)
 app.include_router(users.router, prefix="/users")
 app.include_router(feedback.router, prefix="/feedback")
 app.include_router(session.router, prefix="/session")
-# app.include_router(admin.router, prefix="/admin")
+app.include_router(admin.router, prefix="/admin")

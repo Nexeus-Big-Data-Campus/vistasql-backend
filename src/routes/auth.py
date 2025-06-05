@@ -1,15 +1,15 @@
-# src/routes/auth.py
-import jwt
-import os
 from typing import Annotated
 from sqlmodel import Session
 from src.crud import get_user_by_email, create_user
 from src.db import get_session
 from src.dto import UserCreate, UserLogin
-from src.models import User
-from src.security.security import decode_jwt_token
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from src.models import User
+from src.security.security import decode_jwt_token
+import jwt
+import os
+
 
 
 router = APIRouter()
@@ -34,7 +34,9 @@ def login_user(login: UserLogin, session: Annotated[Session, Depends(get_session
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
     token = user.get_jwt_token()
-    
+    return {"access_token": token, "token_type": "bearer"}
+
+
 def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Depends(get_session)) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
