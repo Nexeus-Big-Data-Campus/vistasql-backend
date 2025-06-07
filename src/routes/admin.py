@@ -1,16 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlmodel import Session, select, func
 from src.db import get_session
+from src.middleware.auth_middleware import admin_required
 from src.models import User
 from datetime import datetime, timedelta
-from src.routes.auth import get_current_user
 
 router = APIRouter()
-
-def admin_required(user=Depends(get_current_user)):
-    if user.role != "admin":
-        raise HTTPException(status_code=403, detail="Not authorized")
-    return user
 
 @router.get("/user-stats", dependencies=[Depends(admin_required)])
 def user_stats(session: Session = Depends(get_session)):
