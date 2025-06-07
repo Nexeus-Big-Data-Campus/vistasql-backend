@@ -1,3 +1,4 @@
+#src/models/user.py
 import uuid
 from sqlmodel import SQLModel, Field
 from typing import Optional
@@ -15,6 +16,7 @@ class User(SQLModel, table=True):
         primary_key=True,
         index=True,
     )
+    
     name: str
     email: str = Field(index=True, unique=True)
     password: str

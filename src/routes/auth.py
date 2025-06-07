@@ -37,7 +37,6 @@ def login_user(login: UserLogin, session: Annotated[Session, Depends(get_session
     return {"access_token": token, "token_type": "bearer"}
 
 
-
 def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Depends(get_session)) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

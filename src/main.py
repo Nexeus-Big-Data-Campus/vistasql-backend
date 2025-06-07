@@ -20,8 +20,6 @@ app.middleware("http")(auth_middleware)
 # TODO: Allow production url on prod environment
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_credentials=["*"], allow_methods=["*"], allow_headers=["*"])
 
-
-
 app.include_router(auth.router)
 app.include_router(users.router, prefix="/users")
 app.include_router(feedback.router, prefix="/feedback")
