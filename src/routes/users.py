@@ -6,7 +6,7 @@ from src.db import get_session
 from src.dto import FeedbackCreate
 from src.dto.user import UserUpdate
 from src.models import User  
-from src.security.security import get_current_user
+from src.security.dependencies import get_current_user
 
 router = APIRouter(prefix="/users")
 
