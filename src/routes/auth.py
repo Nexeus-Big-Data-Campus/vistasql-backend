@@ -1,3 +1,6 @@
+# src/routes/auth.py
+import jwt
+import os
 from typing import Annotated
 from sqlmodel import Session
 from src.crud import get_user_by_email, create_user
