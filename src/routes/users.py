@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi.responses import RedirectResponse
 from typing import Annotated
 from sqlmodel import Session
 from src.crud import create_feedback
@@ -9,14 +10,38 @@ from src.dto.user import UserUpdate
 from src.models import User  
 from src.security.security import get_current_user
 from src.routes.auth import get_user_from_token
+from fastapi.security import OAuth2PasswordBearer
+from src.security.security import decode_jwt_token
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 router = APIRouter(prefix="/users")
 
-@router.get("/me")
-def get_current_user_data(
-    current_user: User = Depends(get_current_user)
+router = APIRouter()
+
+@router.get("/login")
+@router.get("/register")
+def redirect_authenticated_user(
+    current_user: dict = Depends(get_current_user),
 ):
-    return current_user
+    """
+    Si el usuario ya está autenticado, redirige a /editor
+    """
+    if current_user:
+        return RedirectResponse(url="/editor", status_code=303)
+
+    # Si por alguna razón no entra en el if (no debería pasar), devolver algo
+    return {"message": "Este endpoint solo se muestra si NO estás autenticado"}
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = decode_jwt_token(token)
+        user_id = payload.get("id")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Token inválido")
+        return payload
+    except Exception:
+        raise HTTPException(status_code=401, detail="No autorizado")
 
 @router.put("/{user_id}")
 def update_user(
