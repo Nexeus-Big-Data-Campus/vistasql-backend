@@ -2,16 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.responses import RedirectResponse
 from typing import Annotated
 from sqlmodel import Session
-from src.crud import create_feedback
-from crud.user_crud import delete_user
+from src.crud import create_feedback, delete_user
 from src.db import get_session
 from src.dto import FeedbackCreate
 from src.dto.user import UserUpdate
 from src.models import User  
-from src.security.security import get_current_user
+from src.security.security import get_current_user, decode_jwt_token
 from src.routes.auth import get_user_from_token
 from fastapi.security import OAuth2PasswordBearer
-from src.security.security import decode_jwt_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 

@@ -4,6 +4,8 @@ import jwt
 from datetime import datetime, timedelta
 from typing import Optional
 from passlib.context import CryptContext
+from fastapi import Request
+from fastapi.responses import JSONResponse
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -26,3 +28,16 @@ def create_jwt_token(data: dict):
 def decode_jwt_token(token: str):
     payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
     return payload
+
+def get_current_user(request: Request):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return JSONResponse(status_code=401, content={"detail":"Token no proporcionado o inválido"})
+        
+    token = auth_header.split(" ")[1]  # Extraer el token después de "Bearer"
+    try:
+        return decode_jwt_token(token)
+    except jwt.exceptions.ExpiredSignatureError:
+        return JSONResponse(status_code=401, detail="El token ha expirado")
+    except jwt.exceptions.DecodeError:
+        return JSONResponse(status_code=401, detail="Token inválido")
