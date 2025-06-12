@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.middleware.auth_middleware import auth_middleware
 from src.routes import auth, feedback, session, users, admin
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     SQLModel.metadata.create_all(engine)
